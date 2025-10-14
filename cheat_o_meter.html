@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cheat-o-Meter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Quiz Screen */
+        .quiz-screen {
+            animation: slideIn 0.3s ease-in-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #cbd5e1;
+            font-size: 1.125rem;
+        }
+
+        .header .subtitle {
+            color: #94a3b8;
+            font-size: 0.875rem;
+            margin-top: 8px;
+        }
+
+        .progress-section {
+            margin-bottom: 32px;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            color: white;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #475569;
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #a855f7, #ec4899);
+            border-radius: 9999px;
+            transition: width 0.3s ease;
+        }
+
+        .question-card {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border-radius: 16px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            padding: 32px;
+            margin-bottom: 32px;
+        }
+
+        .scenario {
+            color: #c084fc;
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .question-title {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 32px;
+        }
+
+        .answers-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .answer-btn {
+            padding: 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: left;
+            border: none;
+            cursor: pointer;
+            background: #475569;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .answer-btn:hover:not(:disabled) {
+            background: #64748b;
+            transform: scale(1.02);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .answer-btn:disabled {
+            cursor: not-allowed;
+            background: #64748b;
+            color: #cbd5e1;
+        }
+
+        .answer-btn.selected {
+            border: 2px solid #a78bfa;
+        }
+
+        /* Results Screen - Enhanced with Fun */
+        .results-screen {
+            animation: slideIn 0.3s ease-in-out;
+        }
+
+        .results-card {
+            border-radius: 24px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            padding: 40px;
+            background: linear-gradient(135deg, var(--color-start), var(--color-end));
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .results-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
+
+        .results-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .results-emoji {
+            font-size: 5rem;
+            text-align: center;
+            margin-bottom: 16px;
+            animation: bounce 0.6s ease-in-out infinite;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-15px) scale(1.1); }
+        }
+
+        .results-title {
+            font-size: 2.25rem;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .fun-tagline {
+            text-align: center;
+            font-size: 1.125rem;
+            font-style: italic;
+            opacity: 0.95;
+            margin-bottom: 16px;
+            min-height: 30px;
+        }
+
+        .results-score {
+            font-size: 2.5rem;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .severity-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.25);
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            text-align: center;
+            margin: 0 auto 32px;
+            display: block;
+            font-size: 1.125rem;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .intensity-bar-container {
+            margin-bottom: 32px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .intensity-bar {
+            width: 100%;
+            height: 28px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 9999px;
+            overflow: hidden;
+            margin-bottom: 12px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .intensity-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
+            border-radius: 9999px;
+            transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            font-weight: 900;
+            color: #1e293b;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .intensity-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+            opacity: 0.85;
+            font-weight: 600;
+        }
+
+        .analysis-section {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        .analysis-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .analysis-description {
+            font-size: 1.125rem;
+            line-height: 1.7;
+            margin-bottom: 24px;
+            opacity: 0.95;
+        }
+
+        .fun-facts-box {
+            background: rgba(255, 255, 255, 0.08);
+            border-left: 4px solid rgba(255, 255, 255, 0.4);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            opacity: 0.9;
+            font-style: italic;
+        }
+
+        .recommendation-box {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .recommendation-label {
+            font-weight: bold;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .recommendation-text {
+            font-size: 1.125rem;
+            line-height: 1.6;
+        }
+
+        .score-breakdown {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .breakdown-label {
+            font-weight: bold;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 16px;
+            opacity: 0.9;
+        }
+
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            font-size: 0.95rem;
+            opacity: 0.9;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .breakdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .risk-gauge {
+            margin-top: 24px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .gauge-label {
+            font-weight: bold;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 16px;
+            opacity: 0.9;
+        }
+
+        .gauge-bars {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .gauge-bar {
+            flex: 1;
+            height: 16px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.5s ease;
+        }
+
+        .gauge-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            opacity: 0.75;
+            font-weight: 600;
+        }
+
+        .reset-btn {
+            width: 100%;
+            background: white;
+            color: #0f172a;
+            font-weight: bold;
+            padding: 18px 24px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            font-size: 1.125rem;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-top: 16px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        .reset-btn:hover {
+            background: #e2e8f0;
+            transform: scale(1.05);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+        }
+
+        .trophy-animation {
+            display: inline-block;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(10deg); }
+        }
+
+        .star-burst {
+            display: inline-block;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Quiz Screen -->
+        <div class="quiz-screen" id="quizScreen">
+            <div class="header">
+                <h1>Cheat-o-Meter</h1>
+                <p>HR Remote Interview Evaluation</p>
+                <p class="subtitle">Assess the level of cheating in this candidate's interview</p>
+            </div>
+
+            <div class="progress-section">
+                <div class="progress-info">
+                    <span>Question <span id="currentQ">1</span>/<span id="totalQ">6</span></span>
+                    <span style="color: #c084fc;">Running Score: <span id="runningScore">0</span></span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 16.67%;"></div>
+                </div>
+            </div>
+
+            <div class="question-card">
+                <div class="scenario" id="scenario"></div>
+                <div class="question-title" id="questionTitle"></div>
+                <div class="answers-list" id="answersList"></div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div class="results-screen hidden" id="resultsScreen">
+            <div class="results-card" id="resultsCard">
+                <div class="results-content">
+                    <div class="results-emoji" id="resultEmoji"></div>
+                    <div class="results-title" id="resultTitle"></div>
+                    <div class="fun-tagline" id="funTagline"></div>
+                    <div class="results-score" id="resultScore"></div>
+                    <div class="severity-badge" id="severityBadge"></div>
+
+                    <div class="intensity-bar-container">
+                        <div class="intensity-bar">
+                            <div class="intensity-bar-fill" id="intensityFill" style="width: 0%;"></div>
+                        </div>
+                        <div class="intensity-labels">
+                            <span>0</span>
+                            <span>9</span>
+                            <span>18</span>
+                            <span>27</span>
+                            <span>54</span>
+                        </div>
+                    </div>
+
+                    <div class="analysis-section">
+                        <h3 class="analysis-title">
+                            <span id="warningEmoji">⚠️</span> Cheating Assessment
+                        </h3>
+                        <p class="analysis-description" id="resultDescription"></p>
+                        
+                        <div class="fun-facts-box" id="funFacts"></div>
+                        
+                        <div class="recommendation-box">
+                            <div class="recommendation-label">HR Recommendation</div>
+                            <div class="recommendation-text" id="resultRecommendation"></div>
+                        </div>
+
+                        <div class="score-breakdown">
+                            <div class="breakdown-label">Cheating Indicators Detected</div>
+                            <div id="breakdownItems"></div>
+                        </div>
+                    </div>
+
+                    <div class="risk-gauge">
+                        <div class="gauge-label">Cheating Level Intensity</div>
+                        <div class="gauge-bars" id="gaugeContainers"></div>
+                        <div class="gauge-labels">
+                            <span>Clean</span>
+                            <span>Minimal</span>
+                            <span>Moderate</span>
+                            <span>Severe</span>
+                            <span>Critical</span>
+                        </div>
+                    </div>
+
+                    <button class="reset-btn" onclick="resetQuiz()">
+                        ↻ Evaluate Another Candidate
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                scenario: "During the Interview",
+                question: "Did you notice anyone else in the background helping the candidate?",
+                answers: [
+                    { text: "Someone was standing nearby, possibly listening or signaling", intensity: 6 },
+                    { text: "Someone briefly walked by in the background", intensity: 2 },
+                    { text: "Someone else was sitting with them, actively participating", intensity: 9 },
+                    { text: "Another person was clearly coaching or feeding answers to the candidate", intensity: 8 }
+                ]
+            },
+            {
+                scenario: "Answering Questions",
+                question: "How did the candidate answer your questions?",
+                answers: [
+                    { text: "Clearly reading from notes or screen, typing sounds audible", intensity: 8 },
+                    { text: "Paused to think, sometimes said 'I'm not sure', seemed genuine", intensity: 1 },
+                    { text: "Answers sounded scripted or copied directly from Google", intensity: 9 },
+                    { text: "Looked away from screen frequently, then gave perfect answers", intensity: 6 }
+                ]
+            },
+            {
+                scenario: "Screen & Setup",
+                question: "What did you notice about their interview setup?",
+                answers: [
+                    { text: "Second monitor clearly showing search results or answers", intensity: 8 },
+                    { text: "Multiple screens visible, possibly with reference materials", intensity: 5 },
+                    { text: "Clean professional background, single screen visible", intensity: 1 },
+                    { text: "Multiple devices/screens, video looked suspicious or pre-recorded", intensity: 9 }
+                ]
+            },
+            {
+                scenario: "When Asked Follow-Up Questions",
+                question: "How did they respond to your follow-up or tricky questions?",
+                answers: [
+                    { text: "Gave vague answers or tried to change the topic", intensity: 5 },
+                    { text: "Clearly panicked or admitted they didn't know what they said earlier", intensity: 9 },
+                    { text: "Honestly said 'I don't know' or asked for clarification", intensity: 1 },
+                    { text: "Struggled significantly, contradicted earlier answers", intensity: 7 }
+                ]
+            },
+            {
+                scenario: "Their Knowledge & Experience",
+                question: "Did their skills match what's on their resume?",
+                answers: [
+                    { text: "No, they couldn't explain projects they claimed to have done", intensity: 7 },
+                    { text: "Somewhat, but less depth than expected", intensity: 4 },
+                    { text: "Not at all, their knowledge was completely different from resume", intensity: 9 },
+                    { text: "Yes, they could easily explain and discuss their projects", intensity: 1 }
+                ]
+            },
+            {
+                scenario: "Technical Issues During Call",
+                question: "Did they have any suspicious technical issues?",
+                answers: [
+                    { text: "Multiple disconnections, reconnections at convenient times", intensity: 7 },
+                    { text: "Stable connection, clear audio and video throughout", intensity: 1 },
+                    { text: "Video looked pre-recorded, deepfaked, or they weren't actually present", intensity: 10 },
+                    { text: "Brief freezes when difficult questions were asked", intensity: 4 }
+                ]
+            }
+        ];
+
+        const funTaglines = {
+            0: "This candidate is squeaky clean! 🧼",
+            1: "A little sus, but nothing we can't work with! 🤨",
+            2: "🚨 Houston, we have a cheater! 🚨",
+            3: "This resume is faker than a $3 bill! 💸",
+            4: "Red flags everywhere! 🚩🚩🚩"
+        };
+
+        const funFacts = {
+            0: "Fun fact: 87% of caught cheaters claim their cat walked on their keyboard! 🐱",
+            1: "Fun fact: The average cheater blinks 3x more during answers! 👀",
+            2: "Fun fact: Cheaters tend to speak 40% faster when nervous! ⚡",
+            3: "Fun fact: People caught cheating often blame 'WiFi issues!' 📡",
+            4: "Fun fact: This is now HR gold for the water cooler stories! 💎"
+        };
+
+        let currentQuestion = 0;
+        let totalCheatingIntensity = 0;
+        let selectedAnswers = [];
+
+        function initQuiz() {
+            document.getElementById('totalQ').textContent = questions.length;
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = questions[currentQuestion];
+            document.getElementById('scenario').textContent = q.scenario;
+            document.getElementById('questionTitle').textContent = q.question;
+            document.getElementById('currentQ').textContent = currentQuestion + 1;
+            document.getElementById('runningScore').textContent = totalCheatingIntensity;
+            
+            const progressPercent = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progressFill').style.width = progressPercent + '%';
+
+            const answersList = document.getElementById('answersList');
+            answersList.innerHTML = '';
+            
+            q.answers.forEach((answer, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.textContent = answer.text;
+                btn.onclick = () => selectAnswer(idx, answer.intensity);
+                answersList.appendChild(btn);
+            });
+        }
+
+        function selectAnswer(idx, intensity) {
+            totalCheatingIntensity += intensity;
+            selectedAnswers.push(intensity);
+            
+            const buttons = document.querySelectorAll('.answer-btn');
+            buttons.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === idx) {
+                    btn.classList.add('selected');
+                }
+            });
+
+            setTimeout(() => {
+                if (currentQuestion < questions.length - 1) {
+                    currentQuestion++;
+                    loadQuestion();
+                } else {
+                    showResults();
+                }
+            }, 600);
+        }
+
+        function getCheatingProfile() {
+            const maxScore = 54;
+            if (totalCheatingIntensity === 0) {
+                return {
+                    level: "Squeaky Clean Candidate",
+                    emoji: "👼",
+                    colorStart: "#22c55e",
+                    colorEnd: "#059669",
+                    description: "No cheating detected! This candidate passed with flying colors and genuine integrity. They're the real deal—hire with confidence!",
+                    recommendation: "✅ SAFE TO HIRE - Integrity champion! This person passed the vibe check spectacularly.",
+                    intensity: "No Cheating",
+                    severity: "PASS",
+                    level_key: 0
+                };
+            }
+            if (totalCheatingIntensity <= 10) {
+                return {
+                    level: "Minimal Cheating Attempts",
+                    emoji: "🤔",
+                    colorStart: "#facc15",
+                    colorEnd: "#d97706",
+                    description: "Minor suspicious behavior detected. Could be nervousness, but there are some signs of dishonesty. Nothing conclusive, but worth a second interview.",
+                    recommendation: "⚠️ PROCEED WITH CAUTION - Schedule a follow-up interview with trickier questions. This one needs verification!",
+                    intensity: "Light Cheating",
+                    severity: "MILD",
+                    level_key: 1
+                };
+            }
+            if (totalCheatingIntensity <= 20) {
+                return {
+                    level: "Moderate Cheating Detected",
+                    emoji: "⚠️",
+                    colorStart: "#f97316",
+                    colorEnd: "#ea580c",
+                    description: "Clear signs of cheating or external assistance detected. Multiple red flags have been confirmed. This candidate is playing games.",
+                    recommendation: "🚫 DO NOT HIRE - Candidate attempted significant deception. Add to 'do not rehire' list and document everything.",
+                    intensity: "Moderate Cheating",
+                    severity: "MODERATE",
+                    level_key: 2
+                };
+            }
+            if (totalCheatingIntensity <= 35) {
+                return {
+                    level: "High-Intensity Cheating",
+                    emoji: "🚩",
+                    colorStart: "#ef4444",
+                    colorEnd: "#b91c1c",
+                    description: "Strong evidence of systematic cheating throughout the interview. This person was running a full operation. They brought backup, resources, and determination.",
+                    recommendation: "🛑 REJECT IMMEDIATELY - Disqualify from future hiring cycles. Consider flagging in industry networks.",
+                    intensity: "Severe Cheating",
+                    severity: "SEVERE",
+                    level_key: 3
+                };
+            }
+            return {
+                level: "Professional Fraud Alert 🚨",
+                emoji: "🚨",
+                colorStart: "#7f1d1d",
+                colorEnd: "#581c87",
+                description: "CRITICAL FRAUD DETECTED! This candidate deployed sophisticated cheating methods, hired a proxy, or deepfaked their way through. This is next-level deception.",
+                recommendation: "⚡ ESCALATE TO LEGAL TEAM - Document everything for potential legal action. This might be a coordinated fraud scheme.",
+                intensity: "Critical Fraud",
+                severity: "CRITICAL",
+                level_key: 4
+            };
+        }
+
+        function showResults() {
+            const profile = getCheatingProfile();
+            const percentage = Math.round((totalCheatingIntensity / 54) * 100);
+
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('resultsScreen').classList.remove('hidden');
+
+            const resultsCard = document.getElementById('resultsCard');
+            resultsCard.style.background = `linear-gradient(135deg, ${profile.colorStart}, ${profile.colorEnd})`;
+
+            document.getElementById('resultEmoji').textContent = profile.emoji;
+            document.getElementById('resultTitle').textContent = profile.level;
+            document.getElementById('funTagline').textContent = funTaglines[profile.level_key];
+            document.getElementById('resultScore').textContent = `Score: ${totalCheatingIntensity}/54`;
+            document.getElementById('severityBadge').textContent = profile.severity;
+            document.getElementById('resultDescription').textContent = profile.description;
+            document.getElementById('resultRecommendation').textContent = profile.recommendation;
+            document.getElementById('funFacts').textContent = funFacts[profile.level_key];
+
+            document.getElementById('intensityFill').style.width = percentage + '%';
+            document.getElementById('intensityFill').textContent = percentage > 5 ? percentage + '%' : '';
+
+            const breakdownItems = document.getElementById('breakdownItems');
+            breakdownItems.innerHTML = '';
+            selectedAnswers.forEach((intensity, idx) => {
+                const div = document.createElement('div');
+                div.className = 'breakdown-item';
+                const icon = intensity === 0 ? '✅' : '⚠️';
+                const text = intensity === 0 ? 'Clean' : '+' + intensity + ' points';
+                div.innerHTML = `
+                    <span>Question ${idx + 1}</span>
+                    <span style="font-weight: bold;">${icon} ${text}</span>
+                `;
+                breakdownItems.appendChild(div);
+            });
+
+            const gaugeContainers = document.getElementById('gaugeContainers');
+            gaugeContainers.innerHTML = '';
+            const ranges = [
+                { max: 0, active: totalCheatingIntensity === 0, color: '#4ade80' },
+                { max: 10, active: totalCheatingIntensity > 0 && totalCheatingIntensity <= 10, color: '#facc15' },
+                { max: 20, active: totalCheatingIntensity > 10 && totalCheatingIntensity <= 20, color: '#fb923c' },
+                { max: 35, active: totalCheatingIntensity > 20 && totalCheatingIntensity <= 35, color: '#ef4444' },
+                { max: 54, active: totalCheatingIntensity > 35, color: '#b91c1c' }
+            ];
+            ranges.forEach(range => {
+                const bar = document.createElement('div');
+                bar.className = 'gauge-bar';
+                bar.style.background = range.active ? range.color : 'rgba(255, 255, 255, 0.2)';
+                gaugeContainers.appendChild(bar);
+            });
+        }
+
+        function resetQuiz() {
+            currentQuestion = 0;
+            totalCheatingIntensity = 0;
+            selectedAnswers = [];
+            document.getElementById('quizScreen').classList.remove('hidden');
+            document.getElementById('resultsScreen').classList.add('hidden');
+            loadQuestion();
+        }
+
+        initQuiz();
+    </script>
+</body>
+</html>
